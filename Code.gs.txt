@@ -1,0 +1,46 @@
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('🖨️ Print Menu')
+      .addItem('Print Selected Range', 'printSelection')
+      .addToUi();
+}  
+
+function printSelection() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+  
+  // CHANGED: Fetch the specific hardcoded range instead of the active selection
+  var range = sheet.getRange("U24:AB68"); 
+  var gid = sheet.getSheetId();
+    
+  // Get range boundaries for the selection
+  var r1 = range.getRow() - 1;
+  var c1 = range.getColumn() - 1;
+  var r2 = range.getRow() + range.getHeight() - 1;
+  var c2 = range.getColumn() + range.getWidth() - 1;
+    
+  // Construct the export URL for a professional PDF (A4 size)
+  var url = ss.getUrl().replace(/edit[^#]*$/, '') + 'export?format=pdf' +
+            '&size=7' + // 7 = A4 size (Use 0 for Letter size)
+            '&portrait=true' + 
+            '&fitw=true' + // Fit to width perfectly
+            '&gridlines=false' + // Hides empty gridlines for a cleaner look
+            '&printtitle=false' + 
+            '&sheetnames=false' + 
+            '&pagenum=UNDEFINED' + 
+            '&gid=' + gid + 
+            '&r1=' + r1 + '&c1=' + c1 + '&r2=' + r2 + '&c2=' + c2;
+              
+  // Create a dialog with a download button
+  var html = '<html><body style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">' +
+             '<h2 style="color: #202124;">Your Print-Ready File is Ready!</h2>' +
+             '<p style="margin-bottom: 25px; color: #5f6368;">Click the button below to download the professional PDF of your selected cells.</p>' +
+             '<a href="' + url + '" target="_blank" style="display:inline-block; padding:10px 24px; background-color:#1a73e8; color:white; text-decoration:none; border-radius:4px; font-weight: bold; font-size: 14px;">Download PDF</a>' +
+             '</body></html>';
+               
+  var htmlOutput = HtmlService.createHtmlOutput(html)
+      .setWidth(400)
+      .setHeight(220);
+        
+  SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Print Selection');
+}
